@@ -22,6 +22,12 @@
 		"service_worker": "service-worker.js",
 		"type": "module"
 	},
+	"content_scripts": [
+		{
+			"matches": ["http://*/*", "https://*/*"],
+			"js": ["content-script.js"]
+		}
+	],
 	"host_permissions": [
 		"http://*/*",
 		"https://*/*"

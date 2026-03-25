@@ -31,16 +31,31 @@
       >
         <v-icon color="white">{{ mdiAlphaXCircleOutline }}</v-icon>
       </v-btn>
+      <v-btn
+        id="list_action_zap"
+        :disabled="buttonsDisabled"
+        :title="translate(I18NPopupKeys.popup_second_card_blacklist)"
+        size="sm"
+        color="orange darken-2"
+        @click="startZapMode"
+      >
+        <v-icon color="white">{{ mdiCrosshairs }}</v-icon>
+      </v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script lang="ts">
-import { mdiAlphaXCircleOutline, mdiCheckCircleOutline } from '@mdi/js'
+import {
+  mdiCrosshairs,
+  mdiAlphaXCircleOutline,
+  mdiCheckCircleOutline
+} from '@mdi/js'
 import { defineComponent, ref } from '@vue/composition-api'
 import PiHoleApiService from '../../../../service/PiHoleApiService'
 import ApiList from '../../../../api/enum/ApiList'
 import useTranslation from '../../../../hooks/translation'
+import TabService from '../../../../service/TabService'
 
 export default defineComponent({
   name: 'PopupListCardComponent',
@@ -91,14 +106,38 @@ export default defineComponent({
       listDomain(ApiList.blacklist)
     }
 
+    const startZapMode = async () => {
+      buttonsDisabled.value = true
+      try {
+        const currentTabUrl = await TabService.getCurrentTabUrlCleaned()
+        if (!currentTabUrl) {
+          return
+        }
+        chrome.tabs.query(
+          { active: true, lastFocusedWindow: true, currentWindow: true },
+          tabs => {
+            if (tabs[0] && tabs[0].id !== undefined) {
+              chrome.tabs.sendMessage(tabs[0].id, { type: 'enter_zap_mode' })
+            }
+          }
+        )
+      } finally {
+        setTimeout(() => {
+          buttonsDisabled.value = false
+        }, 500)
+      }
+    }
+
     return {
       whitelistingActive,
       blacklistingActive,
       buttonsDisabled,
       mdiCheckCircleOutline,
       mdiAlphaXCircleOutline,
+      mdiCrosshairs,
       whitelistUrl,
       blackListUrl,
+      startZapMode,
       ...useTranslation()
     }
   }

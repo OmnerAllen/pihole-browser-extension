@@ -8,6 +8,7 @@ import { Initializer } from '../../general/Initializer'
 import PiHoleApiService from '../../../service/PiHoleApiService'
 import PiHoleApiStatusEnum from '../../../api/enum/PiHoleApiStatusEnum'
 import HotKeyInitializer from './HotKeyInitializer'
+import BackgroundService from '../../../service/BackgroundService'
 
 export default class BackgroundInitializer implements Initializer {
   private readonly ALARM_NAME = 'pihole.checkStatus'
@@ -31,6 +32,8 @@ export default class BackgroundInitializer implements Initializer {
         console.error('Failed to create alarm')
       }
     )
+
+    this.initZapMessageListener()
   }
 
   private async createAlarm() {
@@ -75,6 +78,31 @@ export default class BackgroundInitializer implements Initializer {
           }
         }
       })
+    })
+  }
+
+  private initZapMessageListener(): void {
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      if (request && request.type === 'zap_candidate_found') {
+        const { pageUrl, urlCandidates } = request
+        BackgroundService.blockDomainFromZap(pageUrl, urlCandidates).then(
+          () => {
+            sendResponse({
+              type: 'zap_result',
+              status: 'success'
+            })
+          },
+          () => {
+            sendResponse({
+              type: 'zap_result',
+              status: 'error',
+              message: 'Failed to add domain to PiHole'
+            })
+          }
+        )
+        return true
+      }
+      return undefined
     })
   }
 }

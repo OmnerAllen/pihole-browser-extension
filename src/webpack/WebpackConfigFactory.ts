@@ -24,6 +24,12 @@ export class WebpackConfigFactory {
           '../',
           'module/background',
           'background.ts'
+        ),
+        'content-script': path.join(
+          __dirname,
+          '../',
+          'module/content',
+          'content-script.ts'
         )
       },
       devtool: isProduction ? false : 'inline-source-map',
@@ -66,7 +72,10 @@ export class WebpackConfigFactory {
       optimization: {
         splitChunks: {
           chunks(chunk) {
-            return chunk.name !== 'service-worker'
+            return (
+              chunk.name !== 'service-worker' &&
+              chunk.name !== 'content-script'
+            )
           }
         }
       },

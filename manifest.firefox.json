@@ -27,6 +27,12 @@
 		"persistent": true,
 		"page": "background.html"
 	},
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["content-script.js"]
+		}
+	],
 	"permissions": [
 		"storage",
 		"<all_urls>",

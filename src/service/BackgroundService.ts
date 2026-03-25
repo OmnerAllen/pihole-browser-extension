@@ -114,4 +114,72 @@ export default class BackgroundService {
   public static openOptions(): void {
     chrome.runtime.openOptionsPage()
   }
+
+  public static async blockDomainFromZap(
+    pageUrl: string,
+    urlCandidates: string[]
+  ): Promise<void> {
+    if (!urlCandidates || urlCandidates.length === 0) {
+      console.warn('No URL candidates from zap; aborting')
+      BadgeService.setBadgeText(ExtensionBadgeTextEnum.error)
+      return
+    }
+
+    const pageHost = (() => {
+      try {
+        return new URL(pageUrl).hostname
+      } catch (e) {
+        return ''
+      }
+    })()
+
+    const cdnHosts = [
+      'cdnjs.cloudflare.com',
+      'cdn.jsdelivr.net',
+      'unpkg.com',
+      'fonts.googleapis.com',
+      'fonts.gstatic.com'
+    ]
+
+    const hostFromUrl = (u: string): string | null => {
+      try {
+        return new URL(u).hostname
+      } catch (e) {
+        return null
+      }
+    }
+
+    const isCdnHost = (host: string): boolean => cdnHosts.includes(host)
+
+    const candidateHosts = urlCandidates
+      .map(hostFromUrl)
+      .filter((h): h is string => !!h)
+
+    const filtered = candidateHosts.filter(host => {
+      if (isCdnHost(host)) {
+        return false
+      }
+      if (pageHost && host === pageHost) {
+        return false
+      }
+      return true
+    })
+
+    if (filtered.length === 0) {
+      console.warn('Only CDN or first-party hosts detected; not blocking')
+      BadgeService.setBadgeText(ExtensionBadgeTextEnum.error)
+      return
+    }
+
+    const chosenHost = filtered[0]
+
+    try {
+      await PiHoleApiService.addDomainToList(ApiList.blacklist, chosenHost)
+      BadgeService.setBadgeText(ExtensionBadgeTextEnum.ok)
+      TabService.reloadCurrentTab(1500)
+    } catch (e) {
+      console.warn('Failed to add zap domain to PiHole', e)
+      BadgeService.setBadgeText(ExtensionBadgeTextEnum.error)
+    }
+  }
 }
