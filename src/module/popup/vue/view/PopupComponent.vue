@@ -20,6 +20,21 @@
       </v-btn>
     </div>
 
+    <v-alert
+      v-if="lastApiErrorText"
+      v-model="showLastErrorAlert"
+      type="error"
+      dense
+      dismissible
+      border="left"
+      class="popup-error-banner mx-3 mt-2 mb-0"
+    >
+      <span class="popup-error-banner__title">{{
+        translate(I18NPopupKeys.popup_last_error_title)
+      }}</span>
+      <span class="popup-error-banner__body">{{ lastApiErrorText }}</span>
+    </v-alert>
+
     <div class="popup-body">
       <PopupStatusCardComponent
         v-if="isActiveByBadgeLoaded"
@@ -33,14 +48,14 @@
     </div>
 
     <div class="popup-footer">
-      Kaden's Local Build
+      Kaden's Local Build {{ localBuildVersionLabel }}
     </div>
   </v-app>
 </template>
 
 <script lang="ts">
 import { mdiCog } from '@mdi/js'
-import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
 import PopupStatusCardComponent from '../components/PopupStatusCardComponent.vue'
 import PopupListCardComponent from '../components/PopupListCardComponent.vue'
 import {
@@ -50,6 +65,7 @@ import {
 import { StorageService } from '../../../../service/StorageService'
 import TabService from '../../../../service/TabService'
 import useTranslation from '../../../../hooks/translation'
+import getLocalBuildVersionLabel from '../../../../buildVersion'
 
 export default defineComponent({
   name: 'PopupComponent',
@@ -63,6 +79,24 @@ export default defineComponent({
     const isActiveByRealStatus = ref(false)
     const currentUrl = ref('')
     const listFeatureDisabled = ref(false)
+    const lastApiErrorText = ref('')
+    const showLastErrorAlert = ref(false)
+
+    const loadLastApiError = async () => {
+      const msg = await StorageService.getLastApiError()
+      lastApiErrorText.value = msg ?? ''
+    }
+
+    watch(lastApiErrorText, v => {
+      showLastErrorAlert.value = !!v
+    })
+
+    watch(showLastErrorAlert, open => {
+      if (!open && lastApiErrorText.value) {
+        StorageService.clearLastApiError()
+        lastApiErrorText.value = ''
+      }
+    })
 
     const updateIsActiveByBadge = async () => {
       const badgeText = await BadgeService.getBadgeText()
@@ -92,6 +126,8 @@ export default defineComponent({
         currentUrl.value.length > 0
     )
 
+    const localBuildVersionLabel = getLocalBuildVersionLabel()
+
     const openOptions = () => {
       // eslint-disable-next-line no-undef
       chrome.runtime.openOptionsPage()
@@ -101,6 +137,15 @@ export default defineComponent({
       updateIsActiveByBadge()
       updateCurrentUrl()
       updateListFeatureDisabled()
+      loadLastApiError()
+      // eslint-disable-next-line no-undef
+      chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'local' || !changes.last_api_error) {
+          return
+        }
+        const next = changes.last_api_error.newValue as string | undefined
+        lastApiErrorText.value = next ?? ''
+      })
     })
 
     return {
@@ -111,6 +156,9 @@ export default defineComponent({
       isListFeatureActive,
       mdiCog,
       openOptions,
+      lastApiErrorText,
+      showLastErrorAlert,
+      localBuildVersionLabel,
       ...useTranslation()
     }
   }
@@ -160,6 +208,23 @@ export default defineComponent({
 }
 
 // --- Body ---
+.popup-error-banner {
+  font-size: 12px;
+  line-height: 1.4;
+
+  &__title {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  &__body {
+    display: block;
+    opacity: 0.95;
+    word-break: break-word;
+  }
+}
+
 .popup-body {
   padding: 6px 12px 0;
   display: flex;

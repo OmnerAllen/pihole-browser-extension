@@ -30,7 +30,8 @@
 		"storage",
 		"activeTab",
 		"contextMenus",
-		"alarms"
+		"alarms",
+		"notifications"
 	],
 	"commands": {
 		"hotkey-toggle-pihole": {

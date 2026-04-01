@@ -101,6 +101,12 @@ export default defineComponent({
           MessageBusService.sendContextMenuSwitchMessage(value)
           StorageService.saveDisableContextMenu(value)
         }
+      },
+      {
+        labelTextKey: I18NOptionKeys.option_enable_action_notifications,
+        getterFunction: () => StorageService.getEnableActionNotifications(),
+        setterFunction: (value: boolean) =>
+          StorageService.saveEnableActionNotifications(value)
       }
     ]
 

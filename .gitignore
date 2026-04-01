@@ -202,3 +202,6 @@ temp/
 # Created package for chrome webstore
 package.chrome.zip
 package.firefox.zip
+
+# Auto-incremented by scripts/increment-local-build.js on each `npm run build`
+local-build-version.json

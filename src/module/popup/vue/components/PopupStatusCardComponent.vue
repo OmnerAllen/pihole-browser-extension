@@ -34,6 +34,7 @@ import {
 import TabService from '../../../../service/TabService'
 import PiHoleApiService from '../../../../service/PiHoleApiService'
 import PiHoleApiStatusEnum from '../../../../api/enum/PiHoleApiStatusEnum'
+import ActionFeedbackService from '../../../../service/ActionFeedbackService'
 
 export default defineComponent({
   name: 'PopupStatusCardComponent',
@@ -106,6 +107,12 @@ export default defineComponent({
 
       PiHoleApiService.getPiHoleStatusCombined()
         .then(value => {
+          if (
+            value !== PiHoleApiStatusEnum.error &&
+            value !== PiHoleApiStatusEnum.unknown
+          ) {
+            ActionFeedbackService.clearLastError()
+          }
           updateComponentsByData({ blocking: value })
         })
         .catch(() =>
@@ -127,24 +134,16 @@ export default defineComponent({
       }
     }
 
-    const throwConsoleBadgeError = (
-      error_message: string,
-      refresh_status: boolean = false
-    ) => {
-      console.warn(error_message)
-
-      updateComponentsByData({ blocking: PiHoleApiStatusEnum.error })
-      if (refresh_status) {
-        setTimeout(() => {
-          PiHoleApiService.getPiHoleStatusCombined()
-            .then(data => updateComponentsByData({ blocking: data }))
-            .catch(() =>
-              updateComponentsByData({
-                blocking: PiHoleApiStatusEnum.error
-              })
-            )
-        }, 1500)
-      }
+    const refreshStatusAfterError = () => {
+      setTimeout(() => {
+        PiHoleApiService.getPiHoleStatusCombined()
+          .then(data => updateComponentsByData({ blocking: data }))
+          .catch(() =>
+            updateComponentsByData({
+              blocking: PiHoleApiStatusEnum.error
+            })
+          )
+      }, 1500)
     }
 
     const sliderClicked = () => {
@@ -157,28 +156,27 @@ export default defineComponent({
       if (time >= 0) {
         PiHoleApiService.changePiHoleStatus(currentMode, time)
           .then(value => {
-            for (const piHoleStatus of value) {
-              if (
-                piHoleStatus.data.blocking === PiHoleApiStatusEnum.error ||
-                piHoleStatus.data.blocking !== currentMode
-              ) {
-                throwConsoleBadgeError(
-                  'One PiHole returned Error from its request. Please check the API Key.',
-                  true
-                )
-                return
-              }
+            if (!ActionFeedbackService.validateToggleResponses(value, currentMode)) {
+              updateComponentsByData({ blocking: PiHoleApiStatusEnum.error })
+              refreshStatusAfterError()
+              return
             }
+            ActionFeedbackService.clearLastError()
+            ActionFeedbackService.notifyToggleSuccess(
+              currentMode === PiHoleApiStatusEnum.enabled
+            )
             onSliderClickSuccessHandler(value[0].data)
           })
           .catch(reason => {
-            throwConsoleBadgeError(reason)
+            ActionFeedbackService.reportApiFailure(reason)
+            updateComponentsByData({ blocking: PiHoleApiStatusEnum.error })
           })
       } else {
-        throwConsoleBadgeError(
-          'Time cannot be smaller than 0. Canceling api request.',
-          true
+        ActionFeedbackService.reportApiFailure(
+          'Time cannot be smaller than 0. Canceling api request.'
         )
+        updateComponentsByData({ blocking: PiHoleApiStatusEnum.error })
+        refreshStatusAfterError()
       }
     }
 

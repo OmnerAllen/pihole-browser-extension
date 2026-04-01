@@ -17,6 +17,8 @@ export interface ExtensionStorage {
   disable_update_notification?: boolean;
   beta_feature_flag?: boolean;
   disable_context_menu?: boolean;
+  last_api_error?: string;
+  enable_action_notifications?: boolean;
 }
 
 export enum ExtensionStorageEnum {
@@ -27,7 +29,9 @@ export enum ExtensionStorageEnum {
   disable_list_feature = 'disable_list_feature',
   disable_update_notification = 'disable_update_notification',
   disable_context_menu = 'disable_context_menu',
-  session_storage = 'session_storage'
+  session_storage = 'session_storage',
+  last_api_error = 'last_api_error',
+  enable_action_notifications = 'enable_action_notifications',
 }
 
 type Postfix = string
@@ -147,6 +151,35 @@ export class StorageService {
   public static saveDisableContextMenu(state: boolean): void {
     const storage: ExtensionStorage = {
       disable_context_menu: state,
+    };
+    chrome.storage.local.set(storage);
+  }
+
+  public static getLastApiError(): Promise<string | undefined> {
+    return this.getStorageValue<string>(ExtensionStorageEnum.last_api_error);
+  }
+
+  public static saveLastApiError(message: string): void {
+    const storage: ExtensionStorage = {
+      last_api_error: message,
+    };
+    chrome.storage.local.set(storage);
+  }
+
+  public static clearLastApiError(): void {
+    chrome.storage.local.remove(ExtensionStorageEnum.last_api_error);
+  }
+
+  public static getEnableActionNotifications(): Promise<boolean> {
+    return this.getStorageValue<boolean>(
+      ExtensionStorageEnum.enable_action_notifications,
+      true,
+    );
+  }
+
+  public static saveEnableActionNotifications(state: boolean): void {
+    const storage: ExtensionStorage = {
+      enable_action_notifications: state,
     };
     chrome.storage.local.set(storage);
   }

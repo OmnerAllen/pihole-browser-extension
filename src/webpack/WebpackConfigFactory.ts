@@ -1,10 +1,23 @@
+import * as fs from 'fs'
 import { Configuration } from 'webpack'
+import webpack from 'webpack'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import ZipPlugin from 'zip-webpack-plugin'
 import * as path from 'path'
 import CopyWebpackPlugin from 'copy-webpack-plugin'
 import VueLoaderPlugin from 'vue-loader/lib/plugin'
 import ESLintWebpackPlugin from 'eslint-webpack-plugin'
+
+function readLocalBuildVersionLabel(): string {
+  const file = path.join(__dirname, '../../local-build-version.json')
+  try {
+    const j = JSON.parse(fs.readFileSync(file, 'utf8')) as { build?: number }
+    const n = typeof j.build === 'number' && Number.isFinite(j.build) ? j.build : 0
+    return `v${n}`
+  } catch {
+    return 'dev'
+  }
+}
 
 export class WebpackConfigFactory {
   public static createConfig(
@@ -71,6 +84,9 @@ export class WebpackConfigFactory {
         }
       },
       plugins: [
+        new webpack.DefinePlugin({
+          __LOCAL_BUILD_VERSION__: JSON.stringify(readLocalBuildVersionLabel())
+        }),
         new CopyWebpackPlugin({
           patterns: [
             {
