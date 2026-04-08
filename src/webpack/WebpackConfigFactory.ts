@@ -32,6 +32,7 @@ export class WebpackConfigFactory {
       entry: {
         popup: path.join(__dirname, '../', 'module/popup', 'popup.ts'),
         options: path.join(__dirname, '../', 'module/option', 'options.ts'),
+        'content-script': path.join(__dirname, '../', 'module/content/content-script.ts'),
         [mainEntryName]: path.join(
           __dirname,
           '../',
@@ -79,7 +80,7 @@ export class WebpackConfigFactory {
       optimization: {
         splitChunks: {
           chunks(chunk) {
-            return chunk.name !== 'service-worker'
+            return chunk.name !== 'service-worker' && chunk.name !== 'content-script'
           }
         }
       },

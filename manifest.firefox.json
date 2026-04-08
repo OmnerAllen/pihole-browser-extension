@@ -48,5 +48,17 @@
 		"hotkey-open-settings": {
 			"description": "__MSG_context_menu_open_settings__"
 		}
-	}
+	},
+	"content_scripts": [
+		{
+			"matches": [
+				"http://*/*",
+				"https://*/*"
+			],
+			"js": [
+				"content-script.js"
+			],
+			"run_at": "document_end"
+		}
+	]
 }
