@@ -13,20 +13,41 @@ export default class PiHoleApiService {
     return new Promise<PiHoleApiStatusEnum>(resolve => {
       this.getPiHoleStatus()
         .then(results => {
+          // helper: normalize various API responses to our enum
+          const normalizeBlocking = (blocking: any): PiHoleApiStatusEnum => {
+            if (blocking === true || blocking === 'true' || blocking === 1 || blocking === '1') {
+              return PiHoleApiStatusEnum.enabled
+            }
+            if (blocking === false || blocking === 'false' || blocking === 0 || blocking === '0') {
+              return PiHoleApiStatusEnum.disabled
+            }
+            if (typeof blocking === 'string') {
+              const b = blocking.toLowerCase()
+              if (b === 'enabled' || b === 'enable' || b === 'on') return PiHoleApiStatusEnum.enabled
+              if (b === 'disabled' || b === 'disable' || b === 'off') return PiHoleApiStatusEnum.disabled
+              if (b === 'error' || b === 'failed') return PiHoleApiStatusEnum.error
+            }
+            return PiHoleApiStatusEnum.error
+          }
+
           for (const result of results) {
             const resultData = result.data
+            const status = normalizeBlocking(resultData.blocking)
             // If any PiHole is offline or has an error we use its status
-            if (
-              resultData.blocking === PiHoleApiStatusEnum.error ||
-              resultData.blocking === PiHoleApiStatusEnum.disabled
-            ) {
-              resolve(resultData.blocking)
+            if (status === PiHoleApiStatusEnum.error || status === PiHoleApiStatusEnum.disabled) {
+              resolve(status)
+              return
             }
           }
+
           resolve(PiHoleApiStatusEnum.enabled)
         })
         .catch(reason => {
-          console.warn(reason)
+          console.warn('getPiHoleStatus error:', reason)
+          if (reason.response) {
+            console.warn('Response data:', reason.response.data)
+            console.warn('Response status:', reason.response.status)
+          }
           resolve(PiHoleApiStatusEnum.error)
         })
     })
@@ -241,7 +262,7 @@ export default class PiHoleApiService {
     // Response interceptor to handle session expiration
     instance.interceptors.response.use(undefined, async error => {
       const isAuthRoute = error.config.url === '/auth'
-      if (error.response.status === 401 && !isAuthRoute) {
+      if (error.response?.status === 401 && !isAuthRoute) {
         console.warn('Session expired, acquiring new session')
         const session = await acquireSid()
         await StorageService.saveSid(domain, session.sid)
