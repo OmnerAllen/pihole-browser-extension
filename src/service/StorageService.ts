@@ -226,7 +226,7 @@ export class StorageService {
   ): Promise<T | undefined> | Promise<T> {
     return new Promise(resolve => {
       chrome.storage.local.get(key, obj => {
-        const storageValue: T | undefined = obj[key];
+        const storageValue = obj[key] as T | undefined;
 
         if (
           typeof defaultUnsetValue !== 'undefined' &&

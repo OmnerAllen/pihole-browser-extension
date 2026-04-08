@@ -1,5 +1,5 @@
 <template>
-  <v-card class="status-card" flat>
+  <v-card class="status-card" variant="flat">
     <v-card-text class="pa-4">
       <div class="toggle-area">
         <v-switch
@@ -9,7 +9,7 @@
           hide-details
           :disabled="sliderDisabled"
           class="mt-0 pt-0"
-          @change="sliderClicked()"
+          @update:model-value="sliderClicked()"
         ></v-switch>
         <div class="status-indicator">
           <span class="status-dot" :class="statusDotClass"></span>
@@ -21,7 +21,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, ref } from 'vue'
+import type { PropType } from 'vue'
 import {
   PiHoleSettingsDefaults,
   StorageService
@@ -38,18 +39,18 @@ import ActionFeedbackService from '../../../../service/ActionFeedbackService'
 
 export default defineComponent({
   name: 'PopupStatusCardComponent',
-  model: { prop: 'isActiveByStatus', event: 'updateStatus' },
   props: {
     isActiveByStatus: {
-      type: Boolean,
+      type: Boolean as PropType<boolean>,
       required: true
     },
     isActiveByBadge: {
-      type: Boolean,
+      type: Boolean as PropType<boolean>,
       required: true
     }
   },
-  setup: (props, { emit }) => {
+  emits: ['update:isActiveByStatus'],
+  setup(props, { emit }) {
     const sliderChecked = ref(props.isActiveByBadge)
     const sliderDisabled = ref(!props.isActiveByBadge)
     /** Seconds for temporary disable; loaded from options storage (not shown in popup). */
@@ -82,17 +83,17 @@ export default defineComponent({
         sliderChecked.value = false
         sliderDisabled.value = false
         BadgeService.setBadgeText(ExtensionBadgeTextEnum.disabled)
-        emit('updateStatus', false)
+        emit('update:isActiveByStatus', false)
       } else if (data.blocking === PiHoleApiStatusEnum.enabled) {
         sliderDisabled.value = false
         sliderChecked.value = true
         BadgeService.setBadgeText(ExtensionBadgeTextEnum.enabled)
-        emit('updateStatus', true)
+        emit('update:isActiveByStatus', true)
       } else {
         sliderDisabled.value = true
         sliderChecked.value = false
         BadgeService.setBadgeText(ExtensionBadgeTextEnum.error)
-        emit('updateStatus', false)
+        emit('update:isActiveByStatus', false)
       }
     }
 

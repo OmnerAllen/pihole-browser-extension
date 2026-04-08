@@ -1,44 +1,44 @@
 <template>
   <div class="list-card-root">
-    <v-card class="list-card" flat>
-    <v-card-text class="pa-4">
-      <div class="list-card__label">
-        {{ translate(I18NPopupKeys.popup_second_card_current_url) }}
-      </div>
-      <div class="url-pill">
-        {{ currentUrl }}
-      </div>
-      <div class="list-card__actions">
-        <v-btn
-          id="list_action_white"
-          :disabled="buttonsDisabled"
-          :title="translate(I18NPopupKeys.popup_second_card_whitelist)"
-          color="success"
-          rounded
-          depressed
-          :loading="whitelistingActive"
-          class="list-card__btn"
-          @click="whitelistUrl"
-        >
-          <v-icon left small>{{ mdiCheckCircleOutline }}</v-icon>
-          {{ translate(I18NPopupKeys.popup_second_card_whitelist) }}
-        </v-btn>
-        <v-btn
-          id="list_action_black"
-          :disabled="buttonsDisabled"
-          :title="translate(I18NPopupKeys.popup_second_card_blacklist)"
-          color="error"
-          rounded
-          depressed
-          :loading="blacklistingActive"
-          class="list-card__btn"
-          @click="blackListUrl"
-        >
-          <v-icon left small>{{ mdiAlphaXCircleOutline }}</v-icon>
-          {{ translate(I18NPopupKeys.popup_second_card_blacklist) }}
-        </v-btn>
-      </div>
-    </v-card-text>
+    <v-card class="list-card" variant="flat">
+      <v-card-text class="pa-4">
+        <div class="list-card__label">
+          {{ translate(I18NPopupKeys.popup_second_card_current_url) }}
+        </div>
+        <div class="url-pill">
+          {{ currentUrl }}
+        </div>
+        <div class="list-card__actions">
+          <v-btn
+            id="list_action_white"
+            :disabled="buttonsDisabled"
+            :title="translate(I18NPopupKeys.popup_second_card_whitelist)"
+            color="success"
+            rounded
+            variant="flat"
+            :loading="whitelistingActive"
+            class="list-card__btn"
+            @click="whitelistUrl"
+          >
+            <v-icon start size="small" :icon="mdiCheckCircleOutline" />
+            {{ translate(I18NPopupKeys.popup_second_card_whitelist) }}
+          </v-btn>
+          <v-btn
+            id="list_action_black"
+            :disabled="buttonsDisabled"
+            :title="translate(I18NPopupKeys.popup_second_card_blacklist)"
+            color="error"
+            rounded
+            variant="flat"
+            :loading="blacklistingActive"
+            class="list-card__btn"
+            @click="blackListUrl"
+          >
+            <v-icon start size="small" :icon="mdiAlphaXCircleOutline" />
+            {{ translate(I18NPopupKeys.popup_second_card_blacklist) }}
+          </v-btn>
+        </div>
+      </v-card-text>
     </v-card>
 
     <transition name="list-toast-fade">
@@ -56,7 +56,8 @@
 
 <script lang="ts">
 import { mdiAlphaXCircleOutline, mdiCheckCircleOutline } from '@mdi/js'
-import { defineComponent, ref } from '@vue/composition-api'
+import { defineComponent, ref } from 'vue'
+import type { PropType } from 'vue'
 import PiHoleApiService from '../../../../service/PiHoleApiService'
 import ApiList from '../../../../api/enum/ApiList'
 import useTranslation from '../../../../hooks/translation'
@@ -68,11 +69,11 @@ export default defineComponent({
   name: 'PopupListCardComponent',
   props: {
     currentUrl: {
-      type: String,
+      type: String as PropType<string>,
       required: true
     }
   },
-  setup: ({ currentUrl }) => {
+  setup(props) {
     const formatListSuccessLine = (
       messageKey: I18NNotificationKeys,
       url: string,
@@ -95,7 +96,8 @@ export default defineComponent({
     let successToastTimer: ReturnType<typeof setTimeout> | undefined
 
     const listDomain = async (mode: ApiList) => {
-      if (!currentUrl) {
+      const url = props.currentUrl
+      if (!url) {
         return
       }
 
@@ -111,27 +113,27 @@ export default defineComponent({
       try {
         await PiHoleApiService.subDomainFromList(
           mode === ApiList.whitelist ? ApiList.blacklist : ApiList.whitelist,
-          currentUrl
+          url
         )
 
-        await PiHoleApiService.addDomainToList(mode, currentUrl)
+        await PiHoleApiService.addDomainToList(mode, url)
 
         ActionFeedbackService.clearLastError()
         BadgeService.setBadgeText(ExtensionBadgeTextEnum.ok)
         if (mode === ApiList.whitelist) {
           successMessage.value = formatListSuccessLine(
             I18NNotificationKeys.notification_whitelist_success_body,
-            currentUrl,
+            url,
             'whitelist'
           )
-          ActionFeedbackService.notifyWhitelistSuccess(currentUrl)
+          ActionFeedbackService.notifyWhitelistSuccess(url)
         } else {
           successMessage.value = formatListSuccessLine(
             I18NNotificationKeys.notification_blacklist_success_body,
-            currentUrl,
+            url,
             'blacklist'
           )
-          ActionFeedbackService.notifyBlacklistSuccess(currentUrl)
+          ActionFeedbackService.notifyBlacklistSuccess(url)
         }
         if (successToastTimer !== undefined) {
           clearTimeout(successToastTimer)
@@ -203,7 +205,7 @@ export default defineComponent({
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.list-toast-fade-enter,
+.list-toast-fade-enter-from,
 .list-toast-fade-leave-to {
   opacity: 0;
   transform: translateY(6px);

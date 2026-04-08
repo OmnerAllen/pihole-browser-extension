@@ -14,10 +14,10 @@
 import {
   defineComponent,
   onMounted,
-  PropType,
+  type PropType,
   ref,
   watch
-} from '@vue/composition-api'
+} from 'vue'
 import useTranslation from '../../../../hooks/translation'
 import { I18NOptionKeys } from '../../../../service/i18NService'
 
@@ -37,7 +37,7 @@ export default defineComponent({
       required: true
     }
   },
-  setup: props => {
+  setup(props) {
     const { translate } = useTranslation()
 
     const isChecked = ref(false)
