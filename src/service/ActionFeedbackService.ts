@@ -105,6 +105,16 @@ export default class ActionFeedbackService {
     ).catch(() => {})
   }
 
+  public static notifyUnblockSuccess(hostname: string): void {
+    this.notifyIfEnabled(
+      I18NService.translate(I18NNotificationKeys.notification_unblock_success_title),
+      I18NService.translate(
+        I18NNotificationKeys.notification_unblock_success_body,
+        hostname
+      )
+    ).catch(() => {})
+  }
+
   public static formatReason(reason: unknown): string {
     if (axios.isAxiosError(reason)) {
       const data = reason.response?.data

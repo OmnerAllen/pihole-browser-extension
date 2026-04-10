@@ -123,6 +123,9 @@
 	"context_menu_whitelist_link_domain": {
 		"message": "Domain dieses Links whitelisten"
 	},
+	"context_menu_unblock_link_domain": {
+		"message": "Domain dieses Links entblocken"
+	},
 	"context_menu_open_settings": {
 		"message": "Einstellungen öffnen"
 	},
@@ -206,6 +209,17 @@
 	},
 	"notification_whitelist_success_body": {
 		"message": "$hostname$ wurde zur Whitelist hinzugefügt.",
+		"placeholders": {
+			"hostname": {
+				"content": "$1"
+			}
+		}
+	},
+	"notification_unblock_success_title": {
+		"message": "Domain entblockt"
+	},
+	"notification_unblock_success_body": {
+		"message": "$hostname$ wurde von der Blacklist entfernt.",
 		"placeholders": {
 			"hostname": {
 				"content": "$1"

@@ -58,7 +58,9 @@ export enum I18NNotificationKeys {
   notification_blacklist_success_title = 'notification_blacklist_success_title',
   notification_blacklist_success_body = 'notification_blacklist_success_body',
   notification_whitelist_success_title = 'notification_whitelist_success_title',
-  notification_whitelist_success_body = 'notification_whitelist_success_body'
+  notification_whitelist_success_body = 'notification_whitelist_success_body',
+  notification_unblock_success_title = 'notification_unblock_success_title',
+  notification_unblock_success_body = 'notification_unblock_success_body'
 }
 
 export enum I18NPopupKeys {
@@ -86,5 +88,6 @@ export enum I18NContextMenuKeys {
   whitelist_current_domain = 'context_menu_whitelist_current_domain',
   blacklist_link_domain = 'context_menu_blacklist_link_domain',
   whitelist_link_domain = 'context_menu_whitelist_link_domain',
+  unblock_link_domain = 'context_menu_unblock_link_domain',
   open_settings = 'context_menu_open_settings'
 }
