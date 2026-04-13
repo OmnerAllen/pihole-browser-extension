@@ -11,19 +11,35 @@
       </div>
       <v-btn
         icon
-        small
+        size="small"
+        variant="text"
         class="popup-header__settings"
         :title="translate(I18NOptionKeys.options_settings)"
         @click="openOptions"
       >
-        <v-icon size="18">{{ mdiCog }}</v-icon>
+        <v-icon :icon="mdiCog" size="18" />
       </v-btn>
     </div>
+
+    <v-alert
+      v-if="lastApiErrorText"
+      v-model="showLastErrorAlert"
+      type="error"
+      density="compact"
+      closable
+      border="start"
+      class="popup-error-banner mx-3 mt-2 mb-0"
+    >
+      <span class="popup-error-banner__title">{{
+        translate(I18NPopupKeys.popup_last_error_title)
+      }}</span>
+      <span class="popup-error-banner__body">{{ lastApiErrorText }}</span>
+    </v-alert>
 
     <div class="popup-body">
       <PopupStatusCardComponent
         v-if="isActiveByBadgeLoaded"
-        v-model="isActiveByRealStatus"
+        v-model:is-active-by-status="isActiveByRealStatus"
         :is-active-by-badge="isActiveByBadge"
       />
       <PopupListCardComponent
@@ -33,14 +49,14 @@
     </div>
 
     <div class="popup-footer">
-      Kaden's Local Build
+      Kaden's Local Build {{ localBuildVersionLabel }}
     </div>
   </v-app>
 </template>
 
 <script lang="ts">
 import { mdiCog } from '@mdi/js'
-import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, ref, watch } from 'vue'
 import PopupStatusCardComponent from '../components/PopupStatusCardComponent.vue'
 import PopupListCardComponent from '../components/PopupListCardComponent.vue'
 import {
@@ -50,6 +66,7 @@ import {
 import { StorageService } from '../../../../service/StorageService'
 import TabService from '../../../../service/TabService'
 import useTranslation from '../../../../hooks/translation'
+import getLocalBuildVersionLabel from '../../../../buildVersion'
 
 export default defineComponent({
   name: 'PopupComponent',
@@ -63,6 +80,24 @@ export default defineComponent({
     const isActiveByRealStatus = ref(false)
     const currentUrl = ref('')
     const listFeatureDisabled = ref(false)
+    const lastApiErrorText = ref('')
+    const showLastErrorAlert = ref(false)
+
+    const loadLastApiError = async () => {
+      const msg = await StorageService.getLastApiError()
+      lastApiErrorText.value = msg ?? ''
+    }
+
+    watch(lastApiErrorText, v => {
+      showLastErrorAlert.value = !!v
+    })
+
+    watch(showLastErrorAlert, open => {
+      if (!open && lastApiErrorText.value) {
+        StorageService.clearLastApiError()
+        lastApiErrorText.value = ''
+      }
+    })
 
     const updateIsActiveByBadge = async () => {
       const badgeText = await BadgeService.getBadgeText()
@@ -92,6 +127,8 @@ export default defineComponent({
         currentUrl.value.length > 0
     )
 
+    const localBuildVersionLabel = getLocalBuildVersionLabel()
+
     const openOptions = () => {
       // eslint-disable-next-line no-undef
       chrome.runtime.openOptionsPage()
@@ -101,6 +138,15 @@ export default defineComponent({
       updateIsActiveByBadge()
       updateCurrentUrl()
       updateListFeatureDisabled()
+      loadLastApiError()
+      // eslint-disable-next-line no-undef
+      chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'local' || !changes.last_api_error) {
+          return
+        }
+        const next = changes.last_api_error.newValue as string | undefined
+        lastApiErrorText.value = next ?? ''
+      })
     })
 
     return {
@@ -111,6 +157,9 @@ export default defineComponent({
       isListFeatureActive,
       mdiCog,
       openOptions,
+      lastApiErrorText,
+      showLastErrorAlert,
+      localBuildVersionLabel,
       ...useTranslation()
     }
   }
@@ -160,6 +209,23 @@ export default defineComponent({
 }
 
 // --- Body ---
+.popup-error-banner {
+  font-size: 12px;
+  line-height: 1.4;
+
+  &__title {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  &__body {
+    display: block;
+    opacity: 0.95;
+    word-break: break-word;
+  }
+}
+
 .popup-body {
   padding: 6px 12px 0;
   display: flex;
@@ -185,11 +251,11 @@ export default defineComponent({
 }
 
 // --- Theme-aware card styles ---
-.theme--dark .popup-body > .v-card {
+.v-theme--dark .popup-body > .v-card {
   border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.theme--light .popup-body > .v-card {
+.v-theme--light .popup-body > .v-card {
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 0 1px rgba(0, 0, 0, 0.04);
 }
@@ -284,13 +350,13 @@ export default defineComponent({
 }
 
 // Theme-aware URL pill
-.theme--dark .list-card .url-pill {
+.v-theme--dark .list-card .url-pill {
   background: rgba(255, 80, 35, 0.1);
   border: 1px solid rgba(255, 80, 35, 0.18);
   color: #ff7a55;
 }
 
-.theme--light .list-card .url-pill {
+.v-theme--light .list-card .url-pill {
   background: rgba(255, 80, 35, 0.06);
   border: 1px solid rgba(255, 80, 35, 0.12);
   color: #d4431e;

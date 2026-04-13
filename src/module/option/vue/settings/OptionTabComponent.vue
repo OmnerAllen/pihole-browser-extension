@@ -2,7 +2,7 @@
   <div class="option-pihole-tabs">
     <v-tabs
       v-model="currentTab"
-      background-color="transparent"
+      bg-color="transparent"
       class="option-pihole-tabs__tabs"
       color="secondary"
       slider-color="secondary"
@@ -10,22 +10,24 @@
       <v-tab
         v-for="(pi_hole_setting, index) in tabs"
         :key="'dyn-tab-' + index"
+        :value="index"
         class="option-pihole-tabs__tab"
         @click="resetConnectionCheckAndCheck"
       >
         Pi-hole {{ index + 1 }}
       </v-tab>
     </v-tabs>
-    <v-tabs-items v-model="currentTab" class="option-pihole-tabs__items">
-      <v-tab-item
+    <v-window v-model="currentTab" class="option-pihole-tabs__items">
+      <v-window-item
         v-for="(pi_hole_setting, index) in tabs"
         :key="index"
+        :value="index"
         class="mt-6"
       >
         <v-text-field
           v-model="pi_hole_setting.pi_uri_base"
           v-debounce:500ms="connectionCheck"
-          outlined
+          variant="outlined"
           debounce-events="input"
           :placeholder="PiHoleSettingsDefaults.pi_uri_base"
           :rules="[
@@ -39,20 +41,20 @@
         <v-text-field
           v-model="pi_hole_setting.api_key"
           v-debounce:500ms="connectionCheck"
-          outlined
+          variant="outlined"
           :type="passwordInputType"
-          :append-icon="
+          :append-inner-icon="
             passwordInputType === 'password' ? mdiEyeOutline : mdiEyeOffOutline
           "
           :label="translate(I18NOptionKeys.options_api_key)"
-          @click:append="toggleApiKeyVisibility"
+          @click:append-inner="toggleApiKeyVisibility"
         ></v-text-field>
 
         <div class="option-pihole-tabs__actions mb-5">
           <v-btn
             v-if="tabs.length < 4"
             rounded
-            depressed
+            variant="flat"
             color="secondary"
             @click.prevent="addNewPiHole"
             >{{ translate(I18NOptionKeys.options_add_button) }}
@@ -60,7 +62,7 @@
           <v-btn
             v-if="tabs.length > 1"
             rounded
-            outlined
+            variant="outlined"
             @click.prevent="removePiHole(currentTab)"
             >{{
               translate(I18NOptionKeys.options_remove_button, [
@@ -72,17 +74,17 @@
         <v-alert
           v-if="tabs.length > 1"
           type="info"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           class="option-pihole-tabs__alert mb-3"
         >
           {{ translate(I18NOptionKeys.option_multiple_connections) }}
         </v-alert>
         <v-alert
           v-if="connectionCheckStatus === 'IDLE'"
-          outlined
+          variant="outlined"
           type="info"
-          dense
+          density="compact"
           class="option-pihole-tabs__alert mb-3"
         >
           {{ translate(I18NOptionKeys.option_connection_check_idle) }}
@@ -91,14 +93,14 @@
             indeterminate
             :size="22"
             :width="2"
-            class="ml-2"
+            class="ms-2"
           />
         </v-alert>
         <v-alert
           v-if="connectionCheckStatus === 'OK'"
           type="success"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           class="option-pihole-tabs__alert mb-3"
         >
           {{ translate(I18NOptionKeys.option_connection_check_ok) }}<br />
@@ -106,9 +108,9 @@
         </v-alert>
         <v-alert
           v-if="connectionCheckStatus === 'ERROR'"
-          outlined
+          variant="outlined"
           type="error"
-          dense
+          density="compact"
           class="option-pihole-tabs__alert mb-3"
         >
           {{ translate(I18NOptionKeys.option_connection_check_error) }}
@@ -121,17 +123,17 @@
                 connectionCheckData.web_update ||
                 connectionCheckData.FTL_update)
           "
-          outlined
+          variant="outlined"
           type="info"
-          dense
+          density="compact"
           class="option-pihole-tabs__alert mb-3"
         >
           {{
             translate(I18NOptionKeys.option_connection_check_update_available)
           }}
         </v-alert>
-      </v-tab-item>
-    </v-tabs-items>
+      </v-window-item>
+    </v-window>
   </div>
 </template>
 
@@ -143,7 +145,7 @@ import {
   onMounted,
   ref,
   watch
-} from '@vue/composition-api'
+} from 'vue'
 import { mdiEyeOffOutline, mdiEyeOutline } from '@mdi/js'
 import {
   PiHoleSettingsStorage,

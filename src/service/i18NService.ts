@@ -41,10 +41,28 @@ export enum I18NOptionKeys {
   option_connection_check_idle = 'option_connection_check_idle',
   option_connection_check_ok = 'option_connection_check_ok',
   option_connection_check_error = 'option_connection_check_error',
-  option_multiple_connections = 'option_multiple_connections'
+  option_multiple_connections = 'option_multiple_connections',
+  option_enable_action_notifications = 'option_enable_action_notifications'
+}
+
+export enum I18NNotificationKeys {
+  notification_error_generic_title = 'notification_error_generic_title',
+  notification_toggle_api_error_title = 'notification_toggle_api_error_title',
+  notification_toggle_api_error_detail = 'notification_toggle_api_error_detail',
+  notification_toggle_status_mismatch_title = 'notification_toggle_status_mismatch_title',
+  notification_toggle_status_mismatch_detail = 'notification_toggle_status_mismatch_detail',
+  notification_toggle_enabled_title = 'notification_toggle_enabled_title',
+  notification_toggle_disabled_title = 'notification_toggle_disabled_title',
+  notification_toggle_enabled_body = 'notification_toggle_enabled_body',
+  notification_toggle_disabled_body = 'notification_toggle_disabled_body',
+  notification_blacklist_success_title = 'notification_blacklist_success_title',
+  notification_blacklist_success_body = 'notification_blacklist_success_body',
+  notification_whitelist_success_title = 'notification_whitelist_success_title',
+  notification_whitelist_success_body = 'notification_whitelist_success_body'
 }
 
 export enum I18NPopupKeys {
+  popup_last_error_title = 'popup_last_error_title',
   popup_status_card_title = 'popup_status_card_title',
   popup_status_card_info_text = 'popup_status_card_info_text',
   popup_second_card_current_url = 'popup_second_card_current_url',

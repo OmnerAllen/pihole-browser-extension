@@ -140,5 +140,76 @@
 	},
 	"option_multiple_connections": {
 		"message": "Die Nutzung von mehreren PiHole kann je nach Setup instabil sein. Bitte nutze nach Möglichkeit nur ein PiHole."
+	},
+	"option_enable_action_notifications": {
+		"message": "Desktop-Benachrichtigungen für Pi-hole-Aktionen (Erfolg und Fehler)"
+	},
+	"popup_last_error_title": {
+		"message": "Letzter Fehler"
+	},
+	"notification_error_generic_title": {
+		"message": "Pi-hole API-Fehler"
+	},
+	"notification_toggle_api_error_title": {
+		"message": "Pi-hole meldet einen Fehler"
+	},
+	"notification_toggle_api_error_detail": {
+		"message": "Pi-hole-Instanz $instance$ meldet Blocking-Fehler. Prüfe API-Schlüssel und Pi-hole-Logs.",
+		"placeholders": {
+			"instance": {
+				"content": "$1"
+			}
+		}
+	},
+	"notification_toggle_status_mismatch_title": {
+		"message": "Pi-hole-Status stimmt nicht"
+	},
+	"notification_toggle_status_mismatch_detail": {
+		"message": "Pi-hole #$instance$ erwartete $expected$, meldete aber $actual$.",
+		"placeholders": {
+			"instance": {
+				"content": "$1"
+			},
+			"expected": {
+				"content": "$2"
+			},
+			"actual": {
+				"content": "$3"
+			}
+		}
+	},
+	"notification_toggle_enabled_title": {
+		"message": "Pi-hole-Blocking aktiv"
+	},
+	"notification_toggle_disabled_title": {
+		"message": "Pi-hole-Blocking deaktiviert"
+	},
+	"notification_toggle_enabled_body": {
+		"message": "DNS-Blocking ist auf deinem/deinen Pi-hole(s) jetzt aktiv."
+	},
+	"notification_toggle_disabled_body": {
+		"message": "DNS-Blocking ist auf deinem/deinen Pi-hole(s) jetzt deaktiviert (oder zeitlich begrenzt)."
+	},
+	"notification_blacklist_success_title": {
+		"message": "Domain auf der Blacklist"
+	},
+	"notification_blacklist_success_body": {
+		"message": "$hostname$ wurde zur Blacklist hinzugefügt.",
+		"placeholders": {
+			"hostname": {
+				"content": "$1"
+			}
+		}
+	},
+	"notification_whitelist_success_title": {
+		"message": "Domain auf der Whitelist"
+	},
+	"notification_whitelist_success_body": {
+		"message": "$hostname$ wurde zur Whitelist hinzugefügt.",
+		"placeholders": {
+			"hostname": {
+				"content": "$1"
+			}
+		}
 	}
 }

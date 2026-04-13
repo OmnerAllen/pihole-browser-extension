@@ -1,68 +1,103 @@
 <template>
-  <v-card class="list-card" flat>
-    <v-card-text class="pa-4">
-      <div class="list-card__label">
-        {{ translate(I18NPopupKeys.popup_second_card_current_url) }}
+  <div class="list-card-root">
+    <v-card class="list-card" variant="flat">
+      <v-card-text class="pa-4">
+        <div class="list-card__label">
+          {{ translate(I18NPopupKeys.popup_second_card_current_url) }}
+        </div>
+        <div class="url-pill">
+          {{ currentUrl }}
+        </div>
+        <div class="list-card__actions">
+          <v-btn
+            id="list_action_white"
+            :disabled="buttonsDisabled"
+            :title="translate(I18NPopupKeys.popup_second_card_whitelist)"
+            color="success"
+            rounded
+            variant="flat"
+            :loading="whitelistingActive"
+            class="list-card__btn"
+            @click="whitelistUrl"
+          >
+            <v-icon start size="small" :icon="mdiCheckCircleOutline" />
+            {{ translate(I18NPopupKeys.popup_second_card_whitelist) }}
+          </v-btn>
+          <v-btn
+            id="list_action_black"
+            :disabled="buttonsDisabled"
+            :title="translate(I18NPopupKeys.popup_second_card_blacklist)"
+            color="error"
+            rounded
+            variant="flat"
+            :loading="blacklistingActive"
+            class="list-card__btn"
+            @click="blackListUrl"
+          >
+            <v-icon start size="small" :icon="mdiAlphaXCircleOutline" />
+            {{ translate(I18NPopupKeys.popup_second_card_blacklist) }}
+          </v-btn>
+        </div>
+      </v-card-text>
+    </v-card>
+
+    <transition name="list-toast-fade">
+      <div
+        v-if="successToastVisible && successMessage"
+        class="list-toast"
+        role="status"
+        aria-live="polite"
+      >
+        {{ successMessage }}
       </div>
-      <div class="url-pill">
-        {{ currentUrl }}
-      </div>
-      <div class="list-card__actions">
-        <v-btn
-          id="list_action_white"
-          :disabled="buttonsDisabled"
-          :title="translate(I18NPopupKeys.popup_second_card_whitelist)"
-          color="success"
-          rounded
-          depressed
-          :loading="whitelistingActive"
-          class="list-card__btn"
-          @click="whitelistUrl"
-        >
-          <v-icon left small>{{ mdiCheckCircleOutline }}</v-icon>
-          {{ translate(I18NPopupKeys.popup_second_card_whitelist) }}
-        </v-btn>
-        <v-btn
-          id="list_action_black"
-          :disabled="buttonsDisabled"
-          :title="translate(I18NPopupKeys.popup_second_card_blacklist)"
-          color="error"
-          rounded
-          depressed
-          :loading="blacklistingActive"
-          class="list-card__btn"
-          @click="blackListUrl"
-        >
-          <v-icon left small>{{ mdiAlphaXCircleOutline }}</v-icon>
-          {{ translate(I18NPopupKeys.popup_second_card_blacklist) }}
-        </v-btn>
-      </div>
-    </v-card-text>
-  </v-card>
+    </transition>
+  </div>
 </template>
 
 <script lang="ts">
 import { mdiAlphaXCircleOutline, mdiCheckCircleOutline } from '@mdi/js'
-import { defineComponent, ref } from '@vue/composition-api'
+import { defineComponent, ref } from 'vue'
+import type { PropType } from 'vue'
 import PiHoleApiService from '../../../../service/PiHoleApiService'
 import ApiList from '../../../../api/enum/ApiList'
 import useTranslation from '../../../../hooks/translation'
+import ActionFeedbackService from '../../../../service/ActionFeedbackService'
+import { BadgeService, ExtensionBadgeTextEnum } from '../../../../service/BadgeService'
+import { I18NNotificationKeys, I18NService } from '../../../../service/i18NService'
 
 export default defineComponent({
   name: 'PopupListCardComponent',
   props: {
     currentUrl: {
-      type: String,
+      type: String as PropType<string>,
       required: true
     }
   },
-  setup: ({ currentUrl }) => {
+  setup(props) {
+    const formatListSuccessLine = (
+      messageKey: I18NNotificationKeys,
+      url: string,
+      listKind: 'whitelist' | 'blacklist'
+    ): string => {
+      const fromLocale = I18NService.translate(messageKey, url).trim()
+      if (fromLocale.length > 0) {
+        return fromLocale
+      }
+      return listKind === 'whitelist'
+        ? `${url} was added to the whitelist.`
+        : `${url} was added to the blacklist.`
+    }
+
     const buttonsDisabled = ref(false)
     const whitelistingActive = ref(false)
     const blacklistingActive = ref(false)
+    const successToastVisible = ref(false)
+    const successMessage = ref('')
+    let successToastTimer: ReturnType<typeof setTimeout> | undefined
 
     const listDomain = async (mode: ApiList) => {
-      if (!currentUrl) {
+      const url = props.currentUrl
+      if (!url) {
         return
       }
 
@@ -75,12 +110,42 @@ export default defineComponent({
       }
 
       // We remove the domain from the opposite list
-      await PiHoleApiService.subDomainFromList(
-        mode === ApiList.whitelist ? ApiList.blacklist : ApiList.whitelist,
-        currentUrl
-      )
+      try {
+        await PiHoleApiService.subDomainFromList(
+          mode === ApiList.whitelist ? ApiList.blacklist : ApiList.whitelist,
+          url
+        )
 
-      await PiHoleApiService.addDomainToList(mode, currentUrl)
+        await PiHoleApiService.addDomainToList(mode, url)
+
+        ActionFeedbackService.clearLastError()
+        BadgeService.setBadgeText(ExtensionBadgeTextEnum.ok)
+        if (mode === ApiList.whitelist) {
+          successMessage.value = formatListSuccessLine(
+            I18NNotificationKeys.notification_whitelist_success_body,
+            url,
+            'whitelist'
+          )
+          ActionFeedbackService.notifyWhitelistSuccess(url)
+        } else {
+          successMessage.value = formatListSuccessLine(
+            I18NNotificationKeys.notification_blacklist_success_body,
+            url,
+            'blacklist'
+          )
+          ActionFeedbackService.notifyBlacklistSuccess(url)
+        }
+        if (successToastTimer !== undefined) {
+          clearTimeout(successToastTimer)
+        }
+        successToastVisible.value = true
+        successToastTimer = setTimeout(() => {
+          successToastVisible.value = false
+          successToastTimer = undefined
+        }, 3500)
+      } catch (reason) {
+        ActionFeedbackService.reportApiFailure(reason)
+      }
 
       setTimeout(() => {
         whitelistingActive.value = false
@@ -100,6 +165,8 @@ export default defineComponent({
     return {
       whitelistingActive,
       blacklistingActive,
+      successToastVisible,
+      successMessage,
       buttonsDisabled,
       mdiCheckCircleOutline,
       mdiAlphaXCircleOutline,
@@ -110,3 +177,37 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+.list-card-root {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* In-flow strip below the card so it never covers the Whitelist/Blacklist buttons */
+.list-toast {
+  margin: 10px 2px 0;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #fff !important;
+  text-align: center;
+  word-break: break-word;
+  border-radius: 8px;
+  background: #2e7d32;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.list-toast-fade-enter-active,
+.list-toast-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.list-toast-fade-enter-from,
+.list-toast-fade-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}
+</style>

@@ -1,11 +1,9 @@
 <template>
   <v-app class="options-app">
     <v-navigation-drawer
-      app
       permanent
       width="280"
       class="options-drawer"
-      :mini-variant="false"
     >
       <div class="options-drawer__brand">
         <v-img
@@ -13,7 +11,6 @@
           height="40"
           width="40"
           src="icon/icon-128.png"
-          contain
         />
         <div class="options-drawer__titles">
           <span class="options-drawer__name">Pi-hole</span>
@@ -23,69 +20,53 @@
 
       <v-divider class="options-drawer__divider" />
 
-      <v-list dense nav class="options-drawer__nav">
-        <v-list-item
-          link
-          to="/"
-          class="options-drawer__item"
-        >
-          <v-list-item-icon class="options-drawer__icon">
-            <v-icon>{{ mdiCog }}</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>{{
-              translate(I18NOptionKeys.options_settings)
-            }}</v-list-item-title>
-          </v-list-item-content>
+      <v-list density="compact" nav class="options-drawer__nav">
+        <v-list-item to="/" class="options-drawer__item" rounded="lg">
+          <template #prepend>
+            <v-icon :icon="mdiCog" />
+          </template>
+          <v-list-item-title>{{
+            translate(I18NOptionKeys.options_settings)
+          }}</v-list-item-title>
         </v-list-item>
 
-        <v-list-item
-          link
-          to="/about"
-          class="options-drawer__item"
-        >
-          <v-list-item-icon class="options-drawer__icon">
-            <v-icon>{{ mdiInformationOutline }}</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>{{
-              translate(I18NOptionKeys.options_about)
-            }}</v-list-item-title>
-          </v-list-item-content>
+        <v-list-item to="/about" class="options-drawer__item" rounded="lg">
+          <template #prepend>
+            <v-icon :icon="mdiInformationOutline" />
+          </template>
+          <v-list-item-title>{{
+            translate(I18NOptionKeys.options_about)
+          }}</v-list-item-title>
         </v-list-item>
 
         <v-divider class="my-2" />
 
         <v-list-item
-          link
           :href="LinkConfig.paypal_donation_link"
           target="_blank"
           class="options-drawer__item"
+          rounded="lg"
         >
-          <v-list-item-icon class="options-drawer__icon">
-            <v-icon>{{ mdiGift }}</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>{{
-              translate(I18NOptionKeys.option_donation)
-            }}</v-list-item-title>
-          </v-list-item-content>
+          <template #prepend>
+            <v-icon :icon="mdiGift" />
+          </template>
+          <v-list-item-title>{{
+            translate(I18NOptionKeys.option_donation)
+          }}</v-list-item-title>
         </v-list-item>
 
         <v-list-item
-          link
           :href="LinkConfig.github_issue"
           target="_blank"
           class="options-drawer__item"
+          rounded="lg"
         >
-          <v-list-item-icon class="options-drawer__icon">
-            <v-icon>{{ mdiFire }}</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>{{
-              translate(I18NOptionKeys.option_troubleshooting)
-            }}</v-list-item-title>
-          </v-list-item-content>
+          <template #prepend>
+            <v-icon :icon="mdiFire" />
+          </template>
+          <v-list-item-title>{{
+            translate(I18NOptionKeys.option_troubleshooting)
+          }}</v-list-item-title>
         </v-list-item>
       </v-list>
 
@@ -105,7 +86,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api'
+import { computed, defineComponent } from 'vue'
 import { mdiCog, mdiFire, mdiGift, mdiInformationOutline } from '@mdi/js'
 import useTranslation from '../../../../hooks/translation'
 
@@ -190,21 +171,16 @@ export default defineComponent({
   }
 
   &__item {
-    border-radius: 10px !important;
     margin-bottom: 4px !important;
     min-height: 44px !important;
 
     &.v-list-item--active {
       background: rgba(145, 220, 90, 0.12) !important;
 
-      .v-list-item__title {
+      .v-list-item-title {
         font-weight: 600 !important;
       }
     }
-  }
-
-  &__icon {
-    margin-right: 12px !important;
   }
 
   &__footer {
@@ -217,7 +193,7 @@ export default defineComponent({
   }
 }
 
-.theme--dark .options-drawer__item:not(.v-list-item--active):hover::before {
+.v-theme--dark .options-drawer__item:not(.v-list-item--active):hover::before {
   opacity: 0.06;
 }
 

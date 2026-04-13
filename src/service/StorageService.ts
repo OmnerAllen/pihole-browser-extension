@@ -17,6 +17,8 @@ export interface ExtensionStorage {
   disable_update_notification?: boolean;
   beta_feature_flag?: boolean;
   disable_context_menu?: boolean;
+  last_api_error?: string;
+  enable_action_notifications?: boolean;
 }
 
 export enum ExtensionStorageEnum {
@@ -27,7 +29,9 @@ export enum ExtensionStorageEnum {
   disable_list_feature = 'disable_list_feature',
   disable_update_notification = 'disable_update_notification',
   disable_context_menu = 'disable_context_menu',
-  session_storage = 'session_storage'
+  session_storage = 'session_storage',
+  last_api_error = 'last_api_error',
+  enable_action_notifications = 'enable_action_notifications',
 }
 
 type Postfix = string
@@ -151,6 +155,35 @@ export class StorageService {
     chrome.storage.local.set(storage);
   }
 
+  public static getLastApiError(): Promise<string | undefined> {
+    return this.getStorageValue<string>(ExtensionStorageEnum.last_api_error);
+  }
+
+  public static saveLastApiError(message: string): void {
+    const storage: ExtensionStorage = {
+      last_api_error: message,
+    };
+    chrome.storage.local.set(storage);
+  }
+
+  public static clearLastApiError(): void {
+    chrome.storage.local.remove(ExtensionStorageEnum.last_api_error);
+  }
+
+  public static getEnableActionNotifications(): Promise<boolean> {
+    return this.getStorageValue<boolean>(
+      ExtensionStorageEnum.enable_action_notifications,
+      true,
+    );
+  }
+
+  public static saveEnableActionNotifications(state: boolean): void {
+    const storage: ExtensionStorage = {
+      enable_action_notifications: state,
+    };
+    chrome.storage.local.set(storage);
+  }
+
   public static async getSid(url: string): Promise<string | undefined> {
     const baseUrl = new URL(url).origin;
     const key: MaybeExtensionStorageEnum = `${ExtensionStorageEnum.session_storage}_${baseUrl}`;
@@ -193,7 +226,7 @@ export class StorageService {
   ): Promise<T | undefined> | Promise<T> {
     return new Promise(resolve => {
       chrome.storage.local.get(key, obj => {
-        const storageValue: T | undefined = obj[key];
+        const storageValue = obj[key] as T | undefined;
 
         if (
           typeof defaultUnsetValue !== 'undefined' &&

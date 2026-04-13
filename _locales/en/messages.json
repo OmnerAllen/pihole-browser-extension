@@ -140,5 +140,76 @@
 	},
 	"option_multiple_connections": {
 		"message": "The usage of multiple pihole can be unstable. Please use with caution."
+	},
+	"option_enable_action_notifications": {
+		"message": "Show desktop notifications for Pi-hole actions (success and errors)"
+	},
+	"popup_last_error_title": {
+		"message": "Last error"
+	},
+	"notification_error_generic_title": {
+		"message": "Pi-hole API error"
+	},
+	"notification_toggle_api_error_title": {
+		"message": "Pi-hole returned an error"
+	},
+	"notification_toggle_api_error_detail": {
+		"message": "Pi-hole instance $instance$ returned blocking error. Check your API key and Pi-hole logs.",
+		"placeholders": {
+			"instance": {
+				"content": "$1"
+			}
+		}
+	},
+	"notification_toggle_status_mismatch_title": {
+		"message": "Pi-hole status mismatch"
+	},
+	"notification_toggle_status_mismatch_detail": {
+		"message": "Pi-hole #$instance$ expected $expected$ but got $actual$.",
+		"placeholders": {
+			"instance": {
+				"content": "$1"
+			},
+			"expected": {
+				"content": "$2"
+			},
+			"actual": {
+				"content": "$3"
+			}
+		}
+	},
+	"notification_toggle_enabled_title": {
+		"message": "Pi-hole blocking enabled"
+	},
+	"notification_toggle_disabled_title": {
+		"message": "Pi-hole blocking disabled"
+	},
+	"notification_toggle_enabled_body": {
+		"message": "DNS blocking is now enabled on your Pi-hole(s)."
+	},
+	"notification_toggle_disabled_body": {
+		"message": "DNS blocking is now disabled (or timed) on your Pi-hole(s)."
+	},
+	"notification_blacklist_success_title": {
+		"message": "Domain blacklisted"
+	},
+	"notification_blacklist_success_body": {
+		"message": "$hostname$ was added to the blacklist.",
+		"placeholders": {
+			"hostname": {
+				"content": "$1"
+			}
+		}
+	},
+	"notification_whitelist_success_title": {
+		"message": "Domain whitelisted"
+	},
+	"notification_whitelist_success_body": {
+		"message": "$hostname$ was added to the whitelist.",
+		"placeholders": {
+			"hostname": {
+				"content": "$1"
+			}
+		}
 	}
 }

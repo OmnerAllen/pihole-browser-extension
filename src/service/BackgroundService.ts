@@ -4,6 +4,7 @@ import { PiHoleSettingsDefaults, StorageService } from './StorageService'
 import PiHoleApiService from './PiHoleApiService'
 import TabService from './TabService'
 import ApiList from '../api/enum/ApiList'
+import ActionFeedbackService from './ActionFeedbackService'
 
 export default class BackgroundService {
   public static togglePiHole(): void {
@@ -25,22 +26,17 @@ export default class BackgroundService {
 
         PiHoleApiService.changePiHoleStatus(newStatus, disableTime)
           .then(data => {
-            for (const piHoleStatus of data) {
-              if (
-                piHoleStatus.data.blocking === PiHoleApiStatusEnum.error ||
-                piHoleStatus.data.blocking !== newStatus
-              ) {
-                console.warn(
-                  'One PiHole returned Error from its request. Please check the API Key.'
-                )
-                BadgeService.setBadgeText(ExtensionBadgeTextEnum.error)
-                return
-              }
+            if (!ActionFeedbackService.validateToggleResponses(data, newStatus)) {
+              return
             }
+            ActionFeedbackService.clearLastError()
             BadgeService.setBadgeText(
               newStatus === PiHoleApiStatusEnum.disabled
                 ? ExtensionBadgeTextEnum.disabled
                 : ExtensionBadgeTextEnum.enabled
+            )
+            ActionFeedbackService.notifyToggleSuccess(
+              newStatus === PiHoleApiStatusEnum.enabled
             )
 
             StorageService.getReloadAfterDisable().then(state => {
@@ -50,8 +46,7 @@ export default class BackgroundService {
             })
           })
           .catch(reason => {
-            console.warn(reason)
-            BadgeService.setBadgeText(ExtensionBadgeTextEnum.error)
+            ActionFeedbackService.reportApiFailure(reason)
           })
       })
     })
@@ -65,16 +60,16 @@ export default class BackgroundService {
       .then(() => {
         PiHoleApiService.addDomainToList(ApiList.blacklist, hostname)
           .then(() => {
+            ActionFeedbackService.clearLastError()
             BadgeService.setBadgeText(ExtensionBadgeTextEnum.ok)
+            ActionFeedbackService.notifyBlacklistSuccess(hostname)
           })
           .catch(reason => {
-            console.warn(reason)
-            BadgeService.setBadgeText(ExtensionBadgeTextEnum.error)
+            ActionFeedbackService.reportApiFailure(reason)
           })
       })
       .catch(reason => {
-        console.warn(reason)
-        BadgeService.setBadgeText(ExtensionBadgeTextEnum.error)
+        ActionFeedbackService.reportApiFailure(reason)
       })
   }
 
@@ -94,16 +89,16 @@ export default class BackgroundService {
                 TabService.reloadCurrentTab(1500)
               }
             })
+            ActionFeedbackService.clearLastError()
             BadgeService.setBadgeText(ExtensionBadgeTextEnum.ok)
+            ActionFeedbackService.notifyWhitelistSuccess(hostname)
           })
           .catch(reason => {
-            console.warn(reason)
-            BadgeService.setBadgeText(ExtensionBadgeTextEnum.error)
+            ActionFeedbackService.reportApiFailure(reason)
           })
       })
       .catch(reason => {
-        console.warn(reason)
-        BadgeService.setBadgeText(ExtensionBadgeTextEnum.error)
+        ActionFeedbackService.reportApiFailure(reason)
       })
   }
 

@@ -6,7 +6,7 @@
       </h1>
     </header>
 
-    <v-card flat class="option-settings-card mb-6">
+    <v-card variant="flat" class="option-settings-card mb-6">
       <v-card-title class="option-settings-card__title pa-6 pb-2">
         <span class="option-settings-card__label">{{
           translate(I18NOptionKeys.options_headline_info)
@@ -14,8 +14,8 @@
       </v-card-title>
       <v-card-text class="px-6 pb-6 pt-2">
         <v-alert
-          dense
-          outlined
+          density="compact"
+          variant="outlined"
           type="info"
           class="option-settings-card__info mb-6"
         >
@@ -25,7 +25,7 @@
       </v-card-text>
     </v-card>
 
-    <v-card flat class="option-settings-card">
+    <v-card variant="flat" class="option-settings-card">
       <v-card-title class="option-settings-card__title pa-6 pb-2">
         <span class="option-settings-card__label">{{
           translate(I18NOptionKeys.option_settings_general_settings)
@@ -45,7 +45,7 @@
         <v-btn
           v-if="!isFirefox"
           rounded
-          depressed
+          variant="flat"
           color="secondary"
           class="option-settings-hotkey mt-4"
           @click="openHotKeySettings"
@@ -58,7 +58,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api'
+import { computed, defineComponent } from 'vue'
 import { I18NOptionKeys } from '../../../../service/i18NService'
 import { StorageService } from '../../../../service/StorageService'
 import MessageBusService from '../../../../service/MessageBusService'
@@ -101,6 +101,12 @@ export default defineComponent({
           MessageBusService.sendContextMenuSwitchMessage(value)
           StorageService.saveDisableContextMenu(value)
         }
+      },
+      {
+        labelTextKey: I18NOptionKeys.option_enable_action_notifications,
+        getterFunction: () => StorageService.getEnableActionNotifications(),
+        setterFunction: (value: boolean) =>
+          StorageService.saveEnableActionNotifications(value)
       }
     ]
 
@@ -156,11 +162,11 @@ interface GenericCheckboxComponent {
   transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.theme--dark .option-settings-card {
+.v-theme--dark .option-settings-card {
   border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.theme--light .option-settings-card {
+.v-theme--light .option-settings-card {
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 0 1px rgba(0, 0, 0, 0.04);
 }

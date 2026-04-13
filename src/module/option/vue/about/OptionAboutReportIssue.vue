@@ -4,7 +4,7 @@
       {{ translate(I18NOptionKeys.options_report_error) }}
     </v-card-title>
     <v-card-text>
-      <v-btn class="mb-1" @click="openGithubReport">
+      <v-btn class="mb-1" variant="text" @click="openGithubReport">
         {{ translate(I18NOptionKeys.option_report_error_github) }}
       </v-btn>
       <p>{{ translate(I18NOptionKeys.option_about_copy_debug) }}</p>
@@ -12,17 +12,15 @@
         PiHole Browser Extension: {{ extensionVersion }} <br />Operating System:
         {{ platform }} <br />Browser: {{ browser }}
       </p>
-      <v-btn @click="copyToClipboard">
-        <v-icon>
-          {{ mdiContentCopy }}
-        </v-icon>
+      <v-btn variant="text" @click="copyToClipboard">
+        <v-icon :icon="mdiContentCopy" />
       </v-btn>
     </v-card-text>
   </v-card>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api'
+import { computed, defineComponent, ref } from 'vue'
 import { mdiContentCopy } from '@mdi/js'
 import useTranslation from '../../../../hooks/translation'
 
