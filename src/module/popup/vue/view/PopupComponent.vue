@@ -11,12 +11,13 @@
       </div>
       <v-btn
         icon
-        small
+        size="small"
+        variant="text"
         class="popup-header__settings"
         :title="translate(I18NOptionKeys.options_settings)"
         @click="openOptions"
       >
-        <v-icon size="18">{{ mdiCog }}</v-icon>
+        <v-icon :icon="mdiCog" size="18" />
       </v-btn>
     </div>
 
@@ -24,9 +25,9 @@
       v-if="lastApiErrorText"
       v-model="showLastErrorAlert"
       type="error"
-      dense
-      dismissible
-      border="left"
+      density="compact"
+      closable
+      border="start"
       class="popup-error-banner mx-3 mt-2 mb-0"
     >
       <span class="popup-error-banner__title">{{
@@ -38,7 +39,7 @@
     <div class="popup-body">
       <PopupStatusCardComponent
         v-if="isActiveByBadgeLoaded"
-        v-model="isActiveByRealStatus"
+        v-model:is-active-by-status="isActiveByRealStatus"
         :is-active-by-badge="isActiveByBadge"
       />
       <PopupListCardComponent
@@ -55,7 +56,7 @@
 
 <script lang="ts">
 import { mdiCog } from '@mdi/js'
-import { computed, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, ref, watch } from 'vue'
 import PopupStatusCardComponent from '../components/PopupStatusCardComponent.vue'
 import PopupListCardComponent from '../components/PopupListCardComponent.vue'
 import {
@@ -250,11 +251,11 @@ export default defineComponent({
 }
 
 // --- Theme-aware card styles ---
-.theme--dark .popup-body > .v-card {
+.v-theme--dark .popup-body > .v-card {
   border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.theme--light .popup-body > .v-card {
+.v-theme--light .popup-body > .v-card {
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 0 1px rgba(0, 0, 0, 0.04);
 }
@@ -349,13 +350,13 @@ export default defineComponent({
 }
 
 // Theme-aware URL pill
-.theme--dark .list-card .url-pill {
+.v-theme--dark .list-card .url-pill {
   background: rgba(255, 80, 35, 0.1);
   border: 1px solid rgba(255, 80, 35, 0.18);
   color: #ff7a55;
 }
 
-.theme--light .list-card .url-pill {
+.v-theme--light .list-card .url-pill {
   background: rgba(255, 80, 35, 0.06);
   border: 1px solid rgba(255, 80, 35, 0.12);
   color: #d4431e;
