@@ -245,6 +245,7 @@ export default defineComponent({
           }
         }
         StorageService.savePiHoleSettingsArray(tabs.value)
+        resetConnectionCheckAndCheck()
       },
       { deep: true }
     )

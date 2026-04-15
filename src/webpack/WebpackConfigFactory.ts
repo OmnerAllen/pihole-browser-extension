@@ -134,7 +134,7 @@ export class WebpackConfigFactory {
         new ESLintWebpackPlugin({
           extensions: ['ts', 'vue']
         })
-      ].filter(Boolean)
+      ].filter(Boolean) as webpack.WebpackPluginInstance[]
     }
 
     if (isProduction) {
