@@ -70,6 +70,17 @@ export default class ContextMenuInitializer implements Initializer {
             BackgroundService.whitelistDomainFromLink(info.linkUrl)
           }
         }
+      },
+      {
+        title: I18NService.translate(
+          I18NContextMenuKeys.unblock_link_domain
+        ),
+        contexts: ['link'],
+        onclick: (info?: chrome.contextMenus.OnClickData) => {
+          if (info?.linkUrl) {
+            BackgroundService.unblockDomainFromLink(info.linkUrl)
+          }
+        }
       }
     ]
   }

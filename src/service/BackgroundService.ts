@@ -102,6 +102,21 @@ export default class BackgroundService {
       })
   }
 
+  public static unblockHostname(hostname: string): void {
+    if (hostname.length < 1) {
+      return
+    }
+    PiHoleApiService.subDomainFromList(ApiList.blacklist, hostname)
+      .then(() => {
+        ActionFeedbackService.clearLastError()
+        BadgeService.setBadgeText(ExtensionBadgeTextEnum.ok)
+        ActionFeedbackService.notifyUnblockSuccess(hostname)
+      })
+      .catch(reason => {
+        ActionFeedbackService.reportApiFailure(reason)
+      })
+  }
+
   public static blacklistCurrentDomain(): void {
     TabService.getCurrentTabUrlCleaned().then(url => {
       BackgroundService.blacklistHostname(url)
@@ -123,6 +138,12 @@ export default class BackgroundService {
   public static whitelistDomainFromLink(linkUrl: string): void {
     TabService.getHostnameFromUrlForListing(linkUrl).then(hostname => {
       BackgroundService.whitelistHostname(hostname)
+    })
+  }
+
+  public static unblockDomainFromLink(linkUrl: string): void {
+    TabService.getHostnameFromUrlForListing(linkUrl).then(hostname => {
+      BackgroundService.unblockHostname(hostname)
     })
   }
 
