@@ -41,6 +41,8 @@ export enum I18NOptionKeys {
   option_connection_check_idle = 'option_connection_check_idle',
   option_connection_check_ok = 'option_connection_check_ok',
   option_connection_check_error = 'option_connection_check_error',
+  option_connection_check_retrying = 'option_connection_check_retrying',
+  option_connection_check_retry_button = 'option_connection_check_retry_button',
   option_multiple_connections = 'option_multiple_connections',
   option_enable_action_notifications = 'option_enable_action_notifications'
 }

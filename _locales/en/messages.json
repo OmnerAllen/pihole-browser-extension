@@ -120,11 +120,11 @@
 	"context_menu_blacklist_link_domain": {
 		"message": "Blacklist this link's domain"
 	},
+	"context_menu_unblock_link_domain": {
+		"message": "Unblacklist this link's domain"
+	},
 	"context_menu_whitelist_link_domain": {
 		"message": "Whitelist this link's domain"
-	},
-	"context_menu_unblock_link_domain": {
-		"message": "Unblock this link's domain"
 	},
 	"context_menu_open_settings": {
 		"message": "Open Settings"
@@ -137,6 +137,12 @@
 	},
 	"option_connection_check_error": {
 		"message": "Connection failed"
+	},
+	"option_connection_check_retrying": {
+		"message": "Connection failed, automatically retrying..."
+	},
+	"option_connection_check_retry_button": {
+		"message": "Retry"
 	},
 	"option_connection_check_update_available": {
 		"message": "Update available for PiHole"

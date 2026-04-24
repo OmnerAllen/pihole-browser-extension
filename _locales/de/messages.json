@@ -138,6 +138,12 @@
 	"option_connection_check_error": {
 		"message": "Verbindung fehlerhaft"
 	},
+	"option_connection_check_retrying": {
+		"message": "Verbindung fehlgeschlagen, automatischer Neuversuch..."
+	},
+	"option_connection_check_retry_button": {
+		"message": "Erneut versuchen"
+	},
 	"option_connection_check_update_available": {
 		"message": "Update verfügbar für das PiHole"
 	},

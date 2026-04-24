@@ -107,13 +107,34 @@
           {{ connectionCheckVersionText }}
         </v-alert>
         <v-alert
+          v-if="connectionCheckStatus === 'RETRYING'"
+          variant="outlined"
+          type="warning"
+          density="compact"
+          class="option-pihole-tabs__alert mb-3"
+        >
+          {{ translate(I18NOptionKeys.option_connection_check_retrying) }}
+          <v-progress-circular
+            color="warning"
+            indeterminate
+            :size="22"
+            :width="2"
+            class="ms-2"
+          />
+        </v-alert>
+        <v-alert
           v-if="connectionCheckStatus === 'ERROR'"
           variant="outlined"
           type="error"
           density="compact"
           class="option-pihole-tabs__alert mb-3"
         >
-          {{ translate(I18NOptionKeys.option_connection_check_error) }}
+          <div class="d-flex justify-space-between align-center w-100">
+             <span>{{ translate(I18NOptionKeys.option_connection_check_error) }}</span>
+             <v-btn size="small" color="error" variant="flat" @click.prevent="manualRetry">
+               {{ translate(I18NOptionKeys.option_connection_check_retry_button) }}
+             </v-btn>
+          </div>
         </v-alert>
         <v-alert
           v-if="
@@ -158,7 +179,8 @@ import useTranslation from '../../../../hooks/translation'
 enum ConnectionCheckStatus {
   OK = 'OK',
   ERROR = 'ERROR',
-  IDLE = 'IDLE'
+  IDLE = 'IDLE',
+  RETRYING = 'RETRYING'
 }
 
 enum PasswordInputType {
@@ -188,26 +210,59 @@ export default defineComponent({
 
     const currentSelectedSettings = computed(() => tabs.value[currentTab.value])
 
-    const connectionCheck = () => {
-      connectionCheckStatus.value = ConnectionCheckStatus.IDLE
+    let retryTimeout: ReturnType<typeof setTimeout> | null = null
+
+    const clearRetryTimeout = () => {
+      if (retryTimeout) {
+        clearTimeout(retryTimeout)
+        retryTimeout = null
+      }
+    }
+
+    const connectionCheck = (isRetry = false) => {
+      clearRetryTimeout()
+      if (!isRetry) {
+        connectionCheckStatus.value = ConnectionCheckStatus.IDLE
+      } else {
+        connectionCheckStatus.value = ConnectionCheckStatus.RETRYING
+      }
+      connectionCheckData.value = null
+
+      const handleError = () => {
+        if (!isRetry) {
+          connectionCheckStatus.value = ConnectionCheckStatus.RETRYING
+          retryTimeout = setTimeout(() => {
+            connectionCheck(true)
+          }, 500)
+        } else {
+          connectionCheckStatus.value = ConnectionCheckStatus.ERROR
+        }
+      }
+
       PiHoleApiService.getPiHoleVersion(currentSelectedSettings.value)
         .then(result => {
           if (typeof result.data === 'object') {
             connectionCheckStatus.value = ConnectionCheckStatus.OK
             connectionCheckData.value = result.data
           } else {
-            connectionCheckStatus.value = ConnectionCheckStatus.ERROR
+            handleError()
           }
         })
         .catch(() => {
-          connectionCheckStatus.value = ConnectionCheckStatus.ERROR
+          handleError()
         })
     }
+    
+    const manualRetry = () => {
+      connectionCheck(false)
+    }
+
     const resetConnectionCheckAndCheck = () => {
+      clearRetryTimeout()
       connectionCheckStatus.value = ConnectionCheckStatus.IDLE
       connectionCheckData.value = null
       debounce(() => {
-        connectionCheck()
+        connectionCheck(false)
       }, '300ms')()
     }
 
@@ -286,6 +341,7 @@ export default defineComponent({
       tabs,
       passwordInputType,
       connectionCheck,
+      manualRetry,
       resetConnectionCheckAndCheck,
       isInvalidUrlSchema,
       removePiHole,
